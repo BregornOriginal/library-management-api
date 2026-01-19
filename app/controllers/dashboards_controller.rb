@@ -2,13 +2,13 @@ class DashboardsController < ApplicationController
   def librarian
     authorize! :access, :librarian_dashboard
 
+    overdue_borrowings = Borrowing.overdue.includes(:book, :user)
+
     render json: {
       total_books: Book.count,
       total_borrowed_books: Borrowing.active.count,
       books_due_today: Borrowing.due_today.count,
-      overdue_books: Borrowing.overdue.count,
-      members_with_overdue_books: members_with_overdue_books,
-      recent_borrowings: recent_borrowings
+      overdue_books: format_overdue_borrowings(overdue_borrowings)
     }, status: :ok
   end
 
@@ -16,46 +16,48 @@ class DashboardsController < ApplicationController
     authorize! :access, :member_dashboard
 
     my_borrowings = current_user.borrowings.active.includes(:book)
+    overdue_borrowings = current_user.borrowings.overdue.includes(:book)
 
     render json: {
-      borrowed_books: my_borrowings.as_json(include: :book),
-      overdue_books: current_user.borrowings.overdue.as_json(include: :book),
-      borrowing_history: current_user.borrowings.returned.limit(10).as_json(include: :book)
+      borrowed_books: format_borrowings(my_borrowings),
+      overdue_books: format_borrowings(overdue_borrowings),
+      borrowing_history: format_borrowings(current_user.borrowings.returned.includes(:book).limit(10))
     }, status: :ok
   end
 
   private
 
-  def members_with_overdue_books
-    User.joins(:borrowings)
-        .where(borrowings: { returned_at: nil })
-        .where('borrowings.due_date < ?', Time.current)
-        .distinct
-        .select(:id, :name, :email)
-        .map do |user|
-          {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            overdue_count: user.borrowings.overdue.count,
-            overdue_books: user.borrowings.overdue.includes(:book).map do |borrowing|
-              {
-                book_title: borrowing.book.title,
-                due_date: borrowing.due_date,
-                days_overdue: borrowing.days_overdue
-              }
-            end
-          }
-        end
+  def format_borrowings(borrowings)
+    borrowings.map do |borrowing|
+      {
+        id: borrowing.id,
+        book_id: borrowing.book.id,
+        book_title: borrowing.book.title,
+        book_author: borrowing.book.author,
+        book_genre: borrowing.book.genre,
+        book_isbn: borrowing.book.isbn,
+        borrowed_at: borrowing.borrowed_at,
+        due_date: borrowing.due_date,
+        returned_at: borrowing.returned_at,
+        days_overdue: borrowing.days_overdue
+      }
+    end
   end
 
-  def recent_borrowings
-    Borrowing.includes(:user, :book)
-             .order(created_at: :desc)
-             .limit(10)
-             .as_json(include: {
-               book: { only: [:id, :title, :author] },
-               user: { only: [:id, :name, :email] }
-             })
+  def format_overdue_borrowings(borrowings)
+    borrowings.map do |borrowing|
+      {
+        id: borrowing.id,
+        book_id: borrowing.book.id,
+        book_title: borrowing.book.title,
+        book_author: borrowing.book.author,
+        user_id: borrowing.user.id,
+        user_name: borrowing.user.name,
+        user_email: borrowing.user.email,
+        borrowed_at: borrowing.borrowed_at,
+        due_date: borrowing.due_date,
+        days_overdue: borrowing.days_overdue
+      }
+    end
   end
 end

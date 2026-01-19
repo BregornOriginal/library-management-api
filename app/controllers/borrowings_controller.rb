@@ -49,7 +49,11 @@ class BorrowingsController < ApplicationController
   private
 
   def set_borrowing
-    @borrowing = Borrowing.find(params[:id])
+    @borrowing = if current_user.librarian?
+                   Borrowing.find(params[:id])
+                 else
+                   current_user.borrowings.find(params[:id])
+                 end
   end
 
   def borrowing_create_params

@@ -19,6 +19,7 @@ class Ability
       can :read, Book
       can :create, Borrowing, user_id: user.id
       can :read, Borrowing, user_id: user.id
+      can :update, Borrowing, user_id: user.id # Members can return their own books
       can :access, :member_dashboard
     end
 
