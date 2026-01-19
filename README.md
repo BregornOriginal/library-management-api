@@ -32,7 +32,27 @@ cd library-management-api
 bundle install
 ```
 
-### 3. Database setup
+### 3. Environment variables
+
+Copy the example environment file and update it with your values:
+
+```bash
+cp .env.example .env
+```
+
+Generate a secure JWT secret key:
+
+```bash
+rails secret
+```
+
+Add the generated key to your `.env` file:
+
+```
+DEVISE_JWT_SECRET_KEY=your_generated_secret_here
+```
+
+### 4. Database setup
 
 ```bash
 rails db:create
@@ -40,13 +60,49 @@ rails db:migrate
 rails db:seed
 ```
 
-### 4. Run the server
+### 5. Run the server
 
 ```bash
 rails server
 ```
 
 The API will be available at `http://localhost:3000`
+
+## Authentication Endpoints
+
+### Register (Sign Up)
+- **POST** `/signup`
+- **Body**:
+  ```json
+  {
+    "user": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "password123",
+      "password_confirmation": "password123",
+      "role": "member"
+    }
+  }
+  ```
+- **Response**: Returns user data and JWT token in `Authorization` header
+
+### Login
+- **POST** `/login`
+- **Body**:
+  ```json
+  {
+    "user": {
+      "email": "john@example.com",
+      "password": "password123"
+    }
+  }
+  ```
+- **Response**: Returns user data and JWT token in `Authorization` header
+
+### Logout
+- **DELETE** `/logout`
+- **Headers**: `Authorization: Bearer <your_jwt_token>`
+- **Response**: Success message
 
 ## Testing
 
