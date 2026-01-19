@@ -2,6 +2,8 @@
 
 A Ruby on Rails REST API for managing a library with book borrowing, returns, and LOTR-themed demo data! 🧙‍♂️
 
+**Frontend Repository:** [library-management-frontend](https://github.com/BregornOriginal/library-management-frontend)
+
 ## 🛠️ Tech Stack
 
 Ruby 3.2.2 • Rails 7.1.6 (API) • PostgreSQL • Devise + JWT • CanCanCan • RSpec
@@ -24,6 +26,17 @@ bundle exec rspec
 
 # Start server
 rails server  # API runs on http://localhost:3000
+```
+
+### Frontend Repository
+👉 **[Library Management Frontend](https://github.com/BregornOriginal/library-management-frontend)**
+
+```bash
+# Clone and start the React frontend
+git clone https://github.com/BregornOriginal/library-management-frontend.git
+cd library-management-frontend
+npm install
+npm start  # Runs on http://localhost:3001
 ```
 
 ## 🔐 Demo Credentials (LOTR Characters!)
