@@ -12,4 +12,15 @@ Rails.application.routes.draw do
              }
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  resources :books
+
+  resources :borrowings, only: [:index, :show, :create] do
+    member do
+      patch :return_book
+    end
+  end
+
+  get 'dashboard/librarian', to: 'dashboards#librarian'
+  get 'dashboard/member', to: 'dashboards#member'
 end
